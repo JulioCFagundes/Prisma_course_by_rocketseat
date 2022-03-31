@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+//para gererar o client, utilizamos yarn prisma generate
+//para  abrir o studio, utilizaos yarn prisma studio
+//para criar as tables, utilizamos yarn prisma migrate dev (pega o model e cria a table)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Modules {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  duration    Int
+  created_at  DateTime @default(now())
+
+  CoursesModules CoursesModules[]
+
+  @@map("modules")
+}
+
+model Courses {
+  id            String   @id @default(uuid())
+  name          String   @unique
+  description   String?
+  duration      Int
+  created_at    DateTime @default(now())
+  teacher       Teachers @relation(fields: [fk_id_teacher], references: [id])
+  fk_id_teacher String   @unique
+
+  CoursesModules CoursesModules[]
+  @@map("courses")
+}
+
+model Teachers {
+  id     String   @id @default(uuid())
+  name   String   @unique
+  course Courses?
+
+  @@map("teachers")
+}
+
+model Authors {
+  id    String  @id @default(uuid())
+  name  String  @unique
+  books Books[]
+
+
+
+  @@map("authors")
+}
+
+model Books {
+  id        String  @id @default(uuid())
+  name      String  @unique
+  author_id String
+  author    Authors @relation(fields: [author_id], references: [id])
+
+
+  @@map("books")
+}
+
+model CoursesModules {
+
+  id           String  @id @default(uuid())
+  courses      Courses @relation(fields: [fk_id_course], references: [id])
+  module       Modules @relation(fields: [fk_id_module], references: [id])
+  fk_id_course String
+  fk_id_module String
+
+
+  created_at DateTime @default(now())
+
+  @@map("courses_modules")
+}
